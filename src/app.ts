@@ -3,6 +3,7 @@ import morgan from 'morgan'
 import cors from "cors"
 import { router } from './app/routes'
 import { globalErrorHandler } from './app/middlewares/globalErrorHandler'
+import { notFound } from './app/middlewares/notFound'
 
 export const app: Application = express()
 
@@ -29,4 +30,4 @@ app.get("/", async (req: Request, res: Response) => {
 
 app.use(globalErrorHandler)
 
-app.use((req: Request, res: Response)=>{})
+app.use(notFound)

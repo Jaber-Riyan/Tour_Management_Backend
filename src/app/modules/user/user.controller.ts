@@ -2,24 +2,29 @@
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status-codes"
 import { UserServices } from "./user.service";
-import AppError from "../../errorHelpers/AppError";
+import { catchAsync } from "../../utility/catchAsync";
 
-const createUser = async (req: Request, res: Response, next:NextFunction) => {
-    try {
-        // throw new Error("fake error")
-        const user = await UserServices.createUser(req.body)
-        res.status(httpStatus.CREATED).json({
-            success: true,
-            message: "Account Create Successfully",
-            user
-        })
-    }
-    catch (error: any) {
-        console.log(error);
-        next(error)
-    }
-}
+
+const createUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const user = await UserServices.createUser(req.body)
+    res.status(httpStatus.CREATED).json({
+        success: true,
+        message: "Account Create Successfully",
+        user
+    })
+})
+
+const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const users = await UserServices.getAllUsers()
+
+    res.status(httpStatus.OK).json({
+        success: true,
+        message: "Get All Users",
+        users
+    })
+})
 
 export const UserControllers = {
-    createUser
+    createUser,
+    getAllUsers
 }
