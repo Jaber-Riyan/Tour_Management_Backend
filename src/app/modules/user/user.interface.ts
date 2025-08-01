@@ -20,17 +20,17 @@ export interface IAuthProvider {
 }
 
 export interface IUser {
-    name: string
-    email: string
-    password?: string
-    role: Role
-    phone?: string
-    picture?: string
-    address?: string
-    isDeleted?: boolean
-    isActive?: IsActive
-    isVerified?: boolean
+    name: string,
+    email: string,
+    password?: string,
+    role: Role,
+    phone?: string,
+    picture?: string,
+    address?: string,
+    isDeleted?: boolean,
+    isActive?: IsActive,
+    isVerified?: boolean,
     auths: IAuthProvider[],
-    bookings?: Types.ObjectId[]
-    guides?: Types.ObjectId[]
+    bookings?: Types.ObjectId[],
+    guides?: Types.ObjectId[],
 }
