@@ -1,8 +1,7 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { Router } from "express";
 import { UserControllers } from "./user.controller";
-import { ZodObject } from "zod";
 import { createUserZodSchema } from "./user.validation";
-import { validateSchema } from "../../utility/validateSchema";
+import { validateSchema } from "../../middlewares/validateRequest";
 
 const router = Router()
 
