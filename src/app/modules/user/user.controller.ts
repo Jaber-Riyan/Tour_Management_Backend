@@ -2,8 +2,8 @@
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status-codes"
 import { UserServices } from "./user.service";
-import { catchAsync } from "../../utility/catchAsync";
-import { sendResponse } from "../../utility/sendResponse";
+import { catchAsync } from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
 import { IUser } from "./user.interface";
 
 

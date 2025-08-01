@@ -1,11 +1,10 @@
 import { envVars } from "../../config/env"
 import AppError from "../../errorHelpers/AppError"
-import { generateJwtToken } from "../../utility/jwt"
+import { generateJwtToken } from "../../utils/jwt"
 import { IUser } from "../user/user.interface"
 import { User } from "../user/user.model"
 import bcryptjs from "bcryptjs"
 import httpStatus from "http-status-codes"
-import jwt from "jsonwebtoken"
 
 const credentialsLogin = async (payload: Partial<IUser>) => {
     const { email, password: payloadPassword } = payload
