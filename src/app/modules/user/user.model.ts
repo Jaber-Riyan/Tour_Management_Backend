@@ -6,6 +6,7 @@ const authProviderSchema = new Schema<IAuthProvider>({
     provider: { type: String, required: true },
     providerId: { type: String, required: true }
 }, {
+    _id: false,
     versionKey: false,
     timestamps: true
 })
