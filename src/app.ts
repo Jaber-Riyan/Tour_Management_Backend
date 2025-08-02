@@ -4,10 +4,12 @@ import cors from "cors"
 import { router } from './app/routes'
 import { globalErrorHandler } from './app/middlewares/globalErrorHandler'
 import { notFound } from './app/middlewares/notFound'
+import cookieParser from 'cookie-parser'
 
 export const app: Application = express()
 
 // Necessary Middleware
+app.use(cookieParser())
 app.use(express.json())
 app.use(morgan("dev"))
 app.use(cors({

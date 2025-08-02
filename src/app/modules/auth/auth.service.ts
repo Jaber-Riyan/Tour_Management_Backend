@@ -58,7 +58,7 @@ const getNewAccessToken = async (refreshToken: string) => {
         role: isUserExist.role,
     }
 
-    const accessToken = generateJwtToken(jwtPayload, envVars.JWT_ACCESS_SECRET, envVars.JWT_ACCESS_EXPIRES)
+    const accessToken = generateJwtToken(jwtPayload, envVars.JWT_REFRESH_SECRET, envVars.JWT_REFRESH_EXPIRES)
 
     // delete isUserExist.password
     const { password, ...rest } = isUserExist.toObject()
