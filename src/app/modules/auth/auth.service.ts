@@ -2,7 +2,7 @@ import { JwtPayload } from "jsonwebtoken"
 import { envVars } from "../../config/env"
 import AppError from "../../errorHelpers/AppError"
 import { generateJwtToken, verifyToken } from "../../utils/jwt"
-import { createUserTokens } from "../../utils/userTokes"
+import { createNewAccessTokenWithRefreshToken, createUserTokens } from "../../utils/userTokes"
 import { IsActive, IUser } from "../user/user.interface"
 import { User } from "../user/user.model"
 import bcryptjs from "bcryptjs"
@@ -36,35 +36,10 @@ const credentialsLogin = async (payload: Partial<IUser>) => {
 }
 
 const getNewAccessToken = async (refreshToken: string) => {
-    const verifiedRefreshToken = verifyToken(refreshToken, envVars.JWT_REFRESH_SECRET) as JwtPayload
-
-    const isUserExist = await User.findOne({ email: verifiedRefreshToken.email })
-
-    if (!isUserExist) {
-        throw new AppError(httpStatus.BAD_REQUEST, "User does not Exist")
-    }
-
-    if (isUserExist.isActive === IsActive.BLOCKED || isUserExist.isActive === IsActive.INACTIVE) {
-        throw new AppError(httpStatus.BAD_REQUEST, `User is ${isUserExist.isActive.toLowerCase()}`)
-    }
-
-    if (isUserExist.isDeleted) {
-        throw new AppError(httpStatus.BAD_REQUEST, "User is deleted")
-    }
-
-    const jwtPayload = {
-        userId: isUserExist._id,
-        email: isUserExist.email,
-        role: isUserExist.role,
-    }
-
-    const accessToken = generateJwtToken(jwtPayload, envVars.JWT_REFRESH_SECRET, envVars.JWT_REFRESH_EXPIRES)
-
-    // delete isUserExist.password
-    const { password, ...rest } = isUserExist.toObject()
+    const newAccessToken = await createNewAccessTokenWithRefreshToken(refreshToken)
 
     return {
-        accessToken
+        accessToken: newAccessToken.accessToken
     }
 }
 
