@@ -18,7 +18,9 @@ export const checkAuth = (...authRoles: string[]) => (req: Request, res: Respons
         if (!authRoles.includes(verifiedToken.role)) {
             throw new AppError(httpStatus.FORBIDDEN, "You are not permitted to view this route data!")
         }
- 
+
+        req.user = verifiedToken
+
         next()
     }
     catch (error: any) {
