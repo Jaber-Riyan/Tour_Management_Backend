@@ -68,8 +68,26 @@ const logout = catchAsync(async (req: Request, res: Response, next: NextFunction
     })
 })
 
+const resetPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+    const decodedToken = req.user
+
+    const newPasswordFromBody = req.body.newPassword
+    const oldPasswordFromBody = req.body.oldPassword
+
+    await AuthServices.resetPassword(oldPasswordFromBody, newPasswordFromBody, decodedToken)
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Password Updated Successfully",
+        data: null
+    })
+})
+
 export const AuthController = {
     credentialsLogin,
     getNewAccessToken,
-    logout
+    logout,
+    resetPassword
 }
