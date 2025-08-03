@@ -5,6 +5,7 @@ import httpStatus from "http-status-codes"
 import { AuthServices } from "./auth.service"
 import AppError from "../../errorHelpers/AppError"
 import { setAuthCookie } from "../../utils/setCookie"
+import { clearCookie } from "../../utils/clearCookie"
 
 const credentialsLogin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const loginInfo = await AuthServices.credentialsLogin(req.body)
@@ -49,12 +50,26 @@ const getNewAccessToken = catchAsync(async (req: Request, res: Response, next: N
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,
-        message: "User Token Retrieved Successfully",
+        message: "New Access Token Retrieved Successfully",
         data: tokenInfo
+    })
+})
+
+const logout = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+    clearCookie(res, "accessToken")
+    clearCookie(res, "refreshToken")
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "User Logout Successfully",
+        data: null
     })
 })
 
 export const AuthController = {
     credentialsLogin,
-    getNewAccessToken
+    getNewAccessToken,
+    logout
 }
