@@ -6,6 +6,7 @@ import { AuthServices } from "./auth.service"
 import AppError from "../../errorHelpers/AppError"
 import { setAuthCookie } from "../../utils/setCookie"
 import { clearCookie } from "../../utils/clearCookie"
+import { JwtPayload } from "jsonwebtoken"
 
 const credentialsLogin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const loginInfo = await AuthServices.credentialsLogin(req.body)
@@ -75,7 +76,7 @@ const resetPassword = catchAsync(async (req: Request, res: Response, next: NextF
     const newPasswordFromBody = req.body.newPassword
     const oldPasswordFromBody = req.body.oldPassword
 
-    await AuthServices.resetPassword(oldPasswordFromBody, newPasswordFromBody, decodedToken)
+    await AuthServices.resetPassword(oldPasswordFromBody, newPasswordFromBody, decodedToken as JwtPayload)
 
     sendResponse(res, {
         success: true,
