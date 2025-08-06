@@ -7,17 +7,18 @@ import { notFound } from './app/middlewares/notFound'
 import cookieParser from 'cookie-parser'
 import passport from 'passport'
 import expressSession from "express-session"
+import "./app/config/passport"
 
 export const app: Application = express()
 
 // Passport JS Initialization Middlewares
-app.use(passport.initialize())
-app.use(passport.session())
 app.use(expressSession({
     secret: "Your Secret",
     resave: false,
     saveUninitialized: false
 }))
+app.use(passport.initialize())
+app.use(passport.session())
 
 // Necessary Middleware
 app.use(cookieParser())
