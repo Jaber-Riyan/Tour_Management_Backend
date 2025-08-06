@@ -90,6 +90,12 @@ const resetPassword = catchAsync(async (req: Request, res: Response, next: NextF
 
 const googleCallbackControl = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
+    let redirectTo = req.query.state ? req.query.state as string : ""
+
+    if (redirectTo.startsWith("/")) {
+        redirectTo = redirectTo.slice(1)
+    }
+
     const user = req.user
 
     console.log("User From OAuth", user)
@@ -102,7 +108,7 @@ const googleCallbackControl = catchAsync(async (req: Request, res: Response, nex
 
     setAuthCookie(res, tokenInfo)
 
-    res.redirect(envVars.FRONTEND_URL)
+    res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`)
 })
 
 export const AuthController = {
