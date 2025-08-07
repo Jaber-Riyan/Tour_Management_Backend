@@ -18,12 +18,13 @@ const credentialsLogin = catchAsync(async (req: Request, res: Response, next: Ne
 
         if (err) {
             // return next(err)
-            return new AppError(httpStatus.UNAUTHORIZED, err)
+            return next(new AppError(httpStatus.UNAUTHORIZED, info.message))
+            // return new AppError(httpStatus.UNAUTHORIZED, err)
             // throw new AppError(httpStatus.BAD_REQUEST,err)
         }
 
         if (!user) {
-            return new AppError(httpStatus.NOT_FOUND, info.message)
+            return next(new AppError(httpStatus.NOT_FOUND, info.message))
         }
 
         const { accessToken, refreshToken } = createUserTokens(user)
