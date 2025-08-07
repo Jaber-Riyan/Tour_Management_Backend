@@ -9,28 +9,55 @@ import { clearCookie } from "../../utils/clearCookie"
 import { JwtPayload } from "jsonwebtoken"
 import { createUserTokens } from "../../utils/userTokes"
 import { envVars } from "../../config/env"
+import passport from "passport"
 
 const credentialsLogin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const loginInfo = await AuthServices.credentialsLogin(req.body)
+    // const loginInfo = await AuthServices.credentialsLogin(req.body)
+
+    passport.authenticate("local", async (err: any, user: any, info: any) => {
+
+        if (err) {
+            // return next(err)
+            return new AppError(httpStatus.UNAUTHORIZED, err)
+            // throw new AppError(httpStatus.BAD_REQUEST,err)
+        }
+
+        if (!user) {
+            return new AppError(httpStatus.NOT_FOUND, info.message)
+        }
+
+        const { accessToken, refreshToken } = createUserTokens(user)
+
+        setAuthCookie(res, { accessToken, refreshToken })
+
+        const { password, ...rest } = user.toObject()
+        // delete user.toObject().password
+
+        sendResponse(res, {
+            success: true,
+            statusCode: httpStatus.OK,
+            message: "User Logged In Successfully",
+            data: {
+                accessToken,
+                refreshToken,
+                user: rest
+            }
+        })
+    })(req, res, next)
 
     // res.cookie("accessToken", loginInfo.accessToken, {
     //     httpOnly: true,
     //     secure: false,
     // })
 
-    setAuthCookie(res, loginInfo)
+
 
     // res.cookie("refreshToken", loginInfo.refreshToken, {
     //     httpOnly: true,
     //     secure: false,
     // })
 
-    sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.OK,
-        message: "User Logged In Successfully",
-        data: loginInfo
-    })
+
 })
 
 const getNewAccessToken = catchAsync(async (req: Request, res: Response, next: NextFunction) => {

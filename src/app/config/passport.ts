@@ -3,7 +3,7 @@ import { Strategy as GoogleStrategy, Profile as GoogleStrategyProfile, VerifyCal
 import { envVars } from "./env";
 import { User } from "../modules/user/user.model";
 import { Role } from "../modules/user/user.interface";
-import { IVerifyOptions, Strategy as LocalStrategy, VerifyFunction, VerifyFunctionWithRequest } from "passport-local";
+import { Strategy as LocalStrategy } from "passport-local";
 import bcryptjs from "bcryptjs"
 
 
@@ -13,12 +13,22 @@ passport.use(
             usernameField: "email",
             passwordField: "password"
         },
-        async (email: string, password: string, done: VerifyCallback) => {
+        async (email: string, password: string, done) => {
             try {
                 const isUserExist = await User.findOne({ email })
 
                 if (!isUserExist) {
                     return done(null, false, { message: "User does not Exist" })
+                }
+
+                // if(!isUserExist){
+                //     return done("User does not Exist")
+                // }
+
+                const isGoogleAuthenticated = isUserExist.auths.some(providerObjects => providerObjects.provider == "google")
+
+                if(isGoogleAuthenticated){
+                    return done(null, false, {message:"You have authenticated through google. If you want to login with credentials, then first you login with google and set a password for your gmail, then you can login with email and password"})
                 }
 
                 const isPasswordMatched = await bcryptjs.compare(password!, isUserExist.password!)
