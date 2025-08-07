@@ -1,9 +1,42 @@
 import passport from "passport";
-import { Strategy as GoogleStrategy, Profile as GoogleStrategyProfile, VerifyCallback as GoogleStrategyVerifyCallback } from "passport-google-oauth20";
+import { Strategy as GoogleStrategy, Profile as GoogleStrategyProfile, VerifyCallback } from "passport-google-oauth20";
 import { envVars } from "./env";
 import { User } from "../modules/user/user.model";
 import { Role } from "../modules/user/user.interface";
+import { IVerifyOptions, Strategy as LocalStrategy, VerifyFunction, VerifyFunctionWithRequest } from "passport-local";
+import bcryptjs from "bcryptjs"
 
+
+passport.use(
+    new LocalStrategy(
+        {
+            usernameField: "email",
+            passwordField: "password"
+        },
+        async (email: string, password: string, done: VerifyCallback) => {
+            try {
+                const isUserExist = await User.findOne({ email })
+
+                if (!isUserExist) {
+                    return done(null, false, { message: "User does not Exist" })
+                }
+
+                const isPasswordMatched = await bcryptjs.compare(password!, isUserExist.password!)
+
+                if (!isPasswordMatched) {
+                    return done(null, false, { message: "Incorrect Password" })
+                }
+
+                return done(null, isUserExist)
+
+                // const { accessToken, refreshToken } = createUserTokens(isUserExist)
+            }
+            catch (error) {
+                done(error)
+            }
+        }
+    )
+)
 
 passport.use(
     new GoogleStrategy(
@@ -12,7 +45,7 @@ passport.use(
             clientSecret: envVars.GOOGLE_CLIENT_SECRET,
             callbackURL: envVars.GOOGLE_CALLBACK_URL
         },
-        async (accessToken: string, refreshToken: string, profile: GoogleStrategyProfile, done: GoogleStrategyVerifyCallback) => {
+        async (accessToken: string, refreshToken: string, profile: GoogleStrategyProfile, done: VerifyCallback) => {
             try {
                 const email = profile.emails?.[0].value
 
