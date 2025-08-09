@@ -5,13 +5,42 @@ import AppError from "../errorHelpers/AppError"
 
 export const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
 
+    const errorsSources: any[] = [
+        // {
+        //     path: "isDeleted",
+        //     message: ""
+        // }
+    ]
     let statusCode = httpStatus.INTERNAL_SERVER_ERROR
     let message = `Something went wrong!!`
 
-    if (err instanceof AppError) {
+    if (err.code === 11000) {
+        statusCode = httpStatus.BAD_REQUEST
+        const matchedArray = err.message.match(/"([^"]*)"/)
+        message = `${matchedArray[1]} already exists!!`
+    }
+
+    else if (err.name === "CastError") {
+        statusCode = httpStatus.BAD_REQUEST
+        message = "Invalid Mongodb ObjectID, Please Provide a valid ID"
+    }
+
+    else if (err.name === "ValidationError") {
+        statusCode = httpStatus.INTERNAL_SERVER_ERROR
+        const errors = Object.values(err.errors)
+        errors.forEach((errorObj: any) => errorsSources.push({
+            path: errorObj.path,
+            message: errorObj.message
+        }))
+        // console.log(errorsSources)
+        message = "Validation Error"
+    }
+
+    else if (err instanceof AppError) {
         statusCode = err.statusCode
         message = err.message
     }
+
     else if (err instanceof Error) {
         statusCode = 500
         message = err.message
@@ -20,7 +49,8 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
     res.status(statusCode).json({
         success: false,
         message,
-        err,
+        errorsSources,
+        // err,
         stack: envVars.NODE_ENV === "development" ? err.stack : null
     })
 }

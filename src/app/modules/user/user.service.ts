@@ -49,17 +49,17 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
 
     if (payload.role) {
         if (decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE) {
-            throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+            throw new AppError(httpStatus.FORBIDDEN, "You are not authorized for this action");
         }
 
         if (payload.role === Role.SUPER_ADMIN && decodedToken.role === Role.ADMIN) {
-            throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+            throw new AppError(httpStatus.FORBIDDEN, "You are not authorized for this action");
         }
     }
 
     if (payload.isActive || payload.isDeleted || payload.isVerified) {
         if (decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE) {
-            throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+            throw new AppError(httpStatus.FORBIDDEN, "You are not authorized for this action");
         }
     }
 
