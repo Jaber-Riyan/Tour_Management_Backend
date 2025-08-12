@@ -2,51 +2,45 @@ import { NextFunction, Request, Response } from "express"
 import { envVars } from "../config/env"
 import httpStatus from "http-status-codes"
 import AppError from "../errorHelpers/AppError"
+import { TErrorSources } from "../interfaces/error.type"
+import { handleCastError } from "../helpers/handleCastError"
+import { handleDuplicateError } from "../helpers/handleDuplicateError"
+import { handleValidationError } from "../helpers/handleValidationError"
+import { handleZodError } from "../helpers/handleZodError"
 
 export const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
 
-    const errorsSources: any[] = [
-        // {
-        //     path: "isDeleted",
-        //     message: ""
-        // }
-    ]
+    let errorsSources: TErrorSources[] = []
     let statusCode = httpStatus.INTERNAL_SERVER_ERROR
     let message = `Something went wrong!!`
 
     if (err.code === 11000) {
-        statusCode = httpStatus.BAD_REQUEST
-        const matchedArray = err.message.match(/"([^"]*)"/)
-        message = `${matchedArray[1]} already exists!!`
+        const simplifiedError = handleDuplicateError(err)
+        statusCode = simplifiedError.statusCode
+        message = simplifiedError.message
     }
 
     else if (err.name === "CastError") {
-        statusCode = httpStatus.BAD_REQUEST
-        message = "Invalid Mongodb ObjectID, Please Provide a valid ID"
+        const simplifiedError = handleCastError(err)
+        statusCode = simplifiedError.statusCode
+        message = simplifiedError.message
     }
 
     else if (err.name === "ZodError") {
-        // console.log("Error ", JSON.parse(err));
-        statusCode = httpStatus.BAD_REQUEST
-        message = "Zod Error"
-        JSON.parse(err?.message).forEach((issue: any) => {
-            errorsSources.push({
-                path: issue.path.reverse().join(" inside "),
-                message: issue.message.split(": ")[1]
-            })
-        });
+        const simplifiedError = handleZodError(err)
+
+        statusCode = simplifiedError.statusCode
+        message = simplifiedError.message
+        errorsSources = simplifiedError.errorsSources!
     }
 
     // Mongoose Validation Error
     else if (err.name === "ValidationError") {
-        statusCode = httpStatus.INTERNAL_SERVER_ERROR
-        const errors = Object.values(err.errors)
-        errors.forEach((errorObj: any) => errorsSources.push({
-            path: errorObj.path,
-            message: errorObj.message
-        }))
-        // console.log(errorsSources)
-        message = "Validation Error"
+        const simplifiedError = handleValidationError(err)
+
+        statusCode = simplifiedError.statusCode
+        errorsSources = simplifiedError.errorsSources!
+        message = simplifiedError.message
     }
 
     else if (err instanceof AppError) {
@@ -63,7 +57,7 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
         success: false,
         message,
         errorsSources,
-        err: JSON.parse(err),
+        err: envVars.NODE_ENV === "development" ? JSON.parse(err) : null,
         stack: envVars.NODE_ENV === "development" ? err.stack : null
     })
 }
