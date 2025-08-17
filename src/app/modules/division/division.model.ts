@@ -8,7 +8,8 @@ const divisionSchema = new Schema<IDivision>({
     thumbnail: { type: String },
     description: { type: String }
 }, {
-    timestamps: true
+    timestamps: true,
+    versionKey: false
 })
 
 

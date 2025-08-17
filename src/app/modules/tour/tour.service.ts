@@ -1,4 +1,4 @@
-import { QueryBuilder } from "../../utils/QueryBuilder";
+import { excludeField } from "../../constants";
 import { tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
@@ -33,7 +33,7 @@ const createTour = async (payload: ITour) => {
 //     const limit = Number(query.limit) || 10
 //     const skip = (page - 1) * limit
 
-//     //field fitlering
+//     //field filtering
 //     const fields = query.fields?.split(",").join(" ") || ""
 
 //     //old field => title,location
@@ -97,27 +97,37 @@ const createTour = async (payload: ITour) => {
 
 const getAllTours = async (query: Record<string, string>) => {
 
+    console.log(query);
 
-    const queryBuilder = new QueryBuilder(Tour.find(), query)
+    const filter = query
+    const searchTerm = query.searchTerm
+    const sort = query.sort || "-createdAt"
+    const fields = query.fields.split(",").join(" ") || ""
 
-    const tours = await queryBuilder
-        .search(tourSearchableFields)
-        .filter()
-        .sort()
-        .fields()
-        .paginate()
+    // delete filter["searchTerm"]
+    // delete filter["sort"]
 
-    // const meta = await queryBuilder.getMeta()
+    for (const field of excludeField) {
+        delete filter[field]
+    }
 
-    const [data, meta] = await Promise.all([
-        tours.build(),
-        queryBuilder.getMeta()
-    ])
+    const searchQuery = {
+        $or: tourSearchableFields.map(field => ({
+            [field]: {
+                $regex: searchTerm || "",
+                $options: "i"
+            }
+        }))
+    }
 
+    const tours = await Tour.find(searchQuery).find(filter).sort(sort).select(fields)
+    const totalTours = tours.length
 
     return {
-        data,
-        meta
+        data: tours,
+        meta: {
+            totalTours
+        }
     }
 };
 
@@ -151,14 +161,17 @@ const deleteTour = async (id: string) => {
     return await Tour.findByIdAndDelete(id);
 };
 
+/*------------------------------------------TOUR TYPES APIS SERVICES--------------------------------------*/
+
 const createTourType = async (payload: ITourType) => {
+    console.log("Payload", payload);
     const existingTourType = await TourType.findOne({ name: payload.name });
 
     if (existingTourType) {
         throw new Error("Tour type already exists.");
     }
 
-    return await TourType.create({ name });
+    return await TourType.create({ name: payload.name });
 };
 const getAllTourTypes = async () => {
     return await TourType.find();
