@@ -1,7 +1,7 @@
-import { excludeField } from "../../constants";
 import { tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 
 const createTour = async (payload: ITour) => {
     const existingTour = await Tour.findOne({ title: payload.title });
@@ -95,39 +95,28 @@ const createTour = async (payload: ITour) => {
 //     }
 // };
 
+
 const getAllTours = async (query: Record<string, string>) => {
 
-    console.log(query);
+    const queryBuilder = new QueryBuilder(Tour.find(), query)
 
-    const filter = query
-    const searchTerm = query.searchTerm
-    const sort = query.sort || "-createdAt"
-    const fields = query.fields.split(",").join(" ") || ""
+    const tours = queryBuilder
+        .search(tourSearchableFields)
+        .filter()
+        .sort()
+        .fields()
+        .paginate();
 
-    // delete filter["searchTerm"]
-    // delete filter["sort"]
+    const [data, meta] = await Promise.all([
+        queryBuilder.build(),
+        queryBuilder.getMeta()
+    ])
 
-    for (const field of excludeField) {
-        delete filter[field]
-    }
-
-    const searchQuery = {
-        $or: tourSearchableFields.map(field => ({
-            [field]: {
-                $regex: searchTerm || "",
-                $options: "i"
-            }
-        }))
-    }
-
-    const tours = await Tour.find(searchQuery).find(filter).sort(sort).select(fields)
-    const totalTours = tours.length
+    // console.log(queryExecute);
 
     return {
-        data: tours,
-        meta: {
-            totalTours
-        }
+        data,
+        meta
     }
 };
 
