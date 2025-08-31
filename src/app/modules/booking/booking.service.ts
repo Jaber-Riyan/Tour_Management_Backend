@@ -14,6 +14,10 @@ const getTransactionId = () => {
 
 const createBooking = async (payload: Partial<IBooking>, userId: string) => {
     const transactionId = getTransactionId()
+
+    const session = await Booking.startSession()
+    session.startTransaction()
+
     try {
         const user = await User.findById(userId)
 
@@ -29,33 +33,43 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
 
         const amount = Number(tour.costFrom) * Number(payload.guestCount)
 
-        const booking = await Booking.create({
-            user: userId,
-            status: BOOKING_STATUS.PENDING,
-            ...payload
-        })
+        const booking = await Booking.create([
+            {
+                user: userId,
+                status: BOOKING_STATUS.PENDING,
+                ...payload
+            }
+        ], { session })
 
-        const payment = await Payment.create({
-            booking: booking._id,
-            status: PAYMENT_STATUS.UNPAID,
-            transactionId: transactionId,
-            amount: amount
-        })
+        const payment = await Payment.create([
+            {
+                booking: booking[0]._id,
+                status: PAYMENT_STATUS.UNPAID,
+                transactionId: transactionId,
+                amount: amount
+            }
+        ], { session })
 
         const updatedBooking = await Booking
             .findByIdAndUpdate(
-                booking._id,
-                { payment: payment._id },
-                { new: true, runValidators: true }
+                booking[0]._id,
+                { payment: payment[0]._id },
+                { new: true, runValidators: true, session }
             )
             .populate("user", "name email phone address")
             .populate("tour", "title costFrom")
             .populate("payment")
 
+        // Transaction Commit and End the Session
+        await session.commitTransaction() // Transaction
+        session.endSession()
+
         return updatedBooking
     }
     catch (error: any) {
-        throw new Error(error.message)
+        await session.abortTransaction() // Rollback
+        session.endSession()
+        throw error
     }
 }
 
