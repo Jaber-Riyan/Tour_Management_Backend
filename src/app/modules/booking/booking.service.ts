@@ -7,9 +7,12 @@ import { Booking } from "./booking.model";
 import { Payment } from "../payment/payment.model";
 import { PAYMENT_STATUS } from "../payment/payment.interface";
 import { v4 as uuidv4 } from "uuid"
+import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
+import { SSLService } from "../sslCommerz/sslCommerz.service";
 
 const getTransactionId = () => {
-    return `tran_${Date.now()}_${uuidv4()}`
+    // return `tran_${Date.now()}_${uuidv4()}`
+    return `tran_${Date.now()}`
 }
 
 const createBooking = async (payload: Partial<IBooking>, userId: string) => {
@@ -60,11 +63,32 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
             .populate("tour", "title costFrom")
             .populate("payment")
 
+        const userAddress = (updatedBooking?.user as any).address
+        const userEmail = (updatedBooking?.user as any).email
+        const userPhoneNumber = (updatedBooking?.user as any).phone
+        const userName = (updatedBooking?.user as any).name
+
+        const sslPayload: ISSLCommerz = {
+            address: userAddress,
+            email: userEmail,
+            phoneNumber: userPhoneNumber,
+            name: userName,
+            amount: amount,
+            transactionId: transactionId
+        }
+
+        const sslPayment = await SSLService.sslPaymentInit(sslPayload)
+
+        // console.log(sslPayment);
+
         // Transaction Commit and End the Session
         await session.commitTransaction() // Transaction
         session.endSession()
 
-        return updatedBooking
+        return {
+            paymentUrl: sslPayment.GatewayPageURL,
+            booking: updatedBooking
+        }
     }
     catch (error: any) {
         await session.abortTransaction() // Rollback
@@ -72,6 +96,10 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
         throw error
     }
 }
+
+// Frontend(localhost:5173) -> User -> Tour -> Booking(Pending) -> Payment(Unpaid) -> SSLCommerz Page -> Payment Complete -> Backend(localhost:5000) -> Update Booking(CONFIRM) & Payment(PAID) -> Redirect to Frontend -> Frontend(localhost:5173/payment/success)
+
+// Frontend(localhost:5173) -> User -> Tour -> Booking(Pending) -> Payment(Unpaid) -> SSLCommerz Page -> Payment Fail/Cancel -> Backend(localhost:5000) -> Update Booking(FAILED) & Payment(FAILED) -> Redirect to Frontend -> Frontend(localhost:5173/payment/fail)
 
 const getUserBookings = () => {
     return {}
