@@ -1,3 +1,4 @@
+import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import { divisionSearchableFields } from "./division.constant";
 import { IDivision } from "./division.interface";
@@ -9,17 +10,6 @@ const createDivision = async (payload: IDivision) => {
     if (existingDivision) {
         throw new Error("A division with this name already exists.");
     }
-
-
-    // const baseSlug = payload.name.toLowerCase().split(" ").join("-")
-    // let slug = `${baseSlug}-division`
-
-    // let counter = 0;
-    // while (await Division.exists({ slug })) {
-    //     slug = `${slug}-${counter++}` // dhaka-division-2
-    // }
-
-    // payload.slug = slug;
 
     const division = await Division.create(payload);
 
@@ -57,6 +47,7 @@ const getSingleDivision = async (slug: string) => {
 const updateDivision = async (id: string, payload: Partial<IDivision>) => {
 
     const existingDivision = await Division.findById(id);
+
     if (!existingDivision) {
         throw new Error("Division not found.");
     }
@@ -70,19 +61,11 @@ const updateDivision = async (id: string, payload: Partial<IDivision>) => {
         throw new Error("A division with this name already exists.");
     }
 
-    // if (payload.name) {
-    //     const baseSlug = payload.name.toLowerCase().split(" ").join("-")
-    //     let slug = `${baseSlug}-division`
-
-    //     let counter = 0;
-    //     while (await Division.exists({ slug })) {
-    //         slug = `${slug}-${counter++}` // dhaka-division-2
-    //     }
-
-    //     payload.slug = slug
-    // }
-
     const updatedDivision = await Division.findByIdAndUpdate(id, payload, { new: true, runValidators: true })
+
+    if (payload.thumbnail && existingDivision.thumbnail) {
+        await deleteImageFromCloudinary(existingDivision.thumbnail)
+    }
 
     return updatedDivision
 

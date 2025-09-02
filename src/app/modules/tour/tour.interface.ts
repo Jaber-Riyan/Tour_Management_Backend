@@ -9,7 +9,7 @@ export interface ITour {
     title: string
     slug: string
     description?: string
-    images: string[]
+    images?: string[]
     location?: string
     costFrom: number
     startDate?: Date
@@ -23,5 +23,6 @@ export interface ITour {
     maxGuest?: number
     minAge?: number
     division?: Types.ObjectId
-    tourType: mongoose.ObjectId
+    tourType: mongoose.ObjectId,
+    deleteImages?: string[]
 }

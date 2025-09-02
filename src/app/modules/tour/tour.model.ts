@@ -12,7 +12,7 @@ const tourSchema = new Schema<ITour>({
     title: { type: String, required: true, trim: true },
     slug: { type: String, unique: true },
     description: { type: String },
-    images: { type: [String], default: [] },
+    images: { type: [String], min: 1, max: 5, default: [] },
     location: { type: String },
     costFrom: { type: Number },
     startDate: { type: Date },
