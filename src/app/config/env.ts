@@ -31,11 +31,36 @@ interface EnvConfig {
         SSL_SUCCESS_FRONTEND_URL: string,
         SSL_FAIL_FRONTEND_URL: string,
         SSL_CANCEL_FRONTEND_URL: string,
-    };
+    }
+
+    CLOUDINARY: {
+        CLOUDINARY_CLOUD_NAME: string,
+        CLOUDINARY_API_KEY: string,
+        CLOUDINARY_API_SECRET: string,
+        CLOUDINARY_URL: string
+    }
 }
 
 const loadEnvVariables = (): EnvConfig => {
-    const requiredEnvVariables: string[] = ["PORT", "DB_URL", "NODE_ENV", "BCRYPT_SALT_ROUND", "JWT_ACCESS_EXPIRES", "JWT_ACCESS_SECRET", "SUPER_ADMIN_EMAIL", "SUPER_ADMIN_PASSWORD", "JWT_REFRESH_SECRET", "JWT_REFRESH_EXPIRES", "GOOGLE_CLIENT_SECRET", "GOOGLE_CLIENT_ID", "GOOGLE_CALLBACK_URL", "EXPRESS_SESSION_SECRET", "FRONTEND_URL", "SSL_STORE_ID",
+    const requiredEnvVariables: string[] = [
+        "PORT",
+        "DB_URL",
+        "NODE_ENV",
+        "BCRYPT_SALT_ROUND",
+        "JWT_ACCESS_EXPIRES",
+        "JWT_ACCESS_SECRET",
+        "SUPER_ADMIN_EMAIL",
+        "SUPER_ADMIN_PASSWORD",
+        "JWT_REFRESH_SECRET",
+        "JWT_REFRESH_EXPIRES",
+        "GOOGLE_CLIENT_SECRET",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CALLBACK_URL",
+        "EXPRESS_SESSION_SECRET",
+
+        
+        "FRONTEND_URL", 
+        "SSL_STORE_ID",
         "SSL_STORE_PASS",
         "SSL_PAYMENT_API",
         "SSL_VALIDATION_API",
@@ -45,6 +70,12 @@ const loadEnvVariables = (): EnvConfig => {
         "SSL_SUCCESS_FRONTEND_URL",
         "SSL_FAIL_FRONTEND_URL",
         "SSL_CANCEL_FRONTEND_URL",
+
+
+        "CLOUDINARY_CLOUD_NAME",
+        "CLOUDINARY_API_KEY",
+        "CLOUDINARY_API_SECRET",
+        "CLOUDINARY_URL"
     ];
 
     requiredEnvVariables.forEach(key => {
@@ -83,6 +114,14 @@ const loadEnvVariables = (): EnvConfig => {
             SSL_FAIL_FRONTEND_URL: process.env.SSL_FAIL_FRONTEND_URL as string,
             SSL_CANCEL_FRONTEND_URL: process.env.SSL_CANCEL_FRONTEND_URL as string,
         },
+
+        // CLOUDINARY
+        CLOUDINARY: {
+            CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
+            CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
+            CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
+            CLOUDINARY_URL: process.env.CLOUDINARY_URL as string
+        }
     }
 }
 
