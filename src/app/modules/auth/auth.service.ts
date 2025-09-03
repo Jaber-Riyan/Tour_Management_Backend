@@ -5,7 +5,8 @@ import { createNewAccessTokenWithRefreshToken } from "../../utils/userTokes"
 import { User } from "../user/user.model"
 import bcryptjs from "bcryptjs"
 import httpStatus from "http-status-codes"
-import { IAuthProvider } from "../user/user.interface"
+import { IAuthProvider, IsActive } from "../user/user.interface"
+import { generateJwtToken } from "../../utils/jwt"
 
 // const credentialsLogin = async (payload: Partial<IUser>) => {
 //     const { email, password: payloadPassword } = payload
@@ -99,7 +100,44 @@ const setPassword = async (decodedToken: JwtPayload, plainPassword: string) => {
     user.auths = auths
 
     await user.save()
-    
+
+}
+
+const forgotPassword = async (email: string) => {
+    try {
+        const isUserExist = await User.findOne({ email })
+
+        if (!isUserExist) {
+            throw new AppError(httpStatus.BAD_REQUEST, "User does not Exist")
+        }
+
+        if (!isUserExist.isVerified) {
+            throw new AppError(httpStatus.BAD_REQUEST, "User is not Verified!")
+        }
+
+        if (isUserExist.isActive === IsActive.BLOCKED || isUserExist.isActive === IsActive.INACTIVE) {
+            throw new AppError(httpStatus.BAD_REQUEST, `User is ${isUserExist.isActive.toLowerCase()}`)
+        }
+
+        if (isUserExist.isDeleted) {
+            throw new AppError(httpStatus.BAD_REQUEST, "User is deleted")
+        }
+
+        const jwtPayload = {
+            userId: isUserExist._id,
+            email: isUserExist.email,
+            role: isUserExist.role
+        }
+
+        const resetToken = generateJwtToken(jwtPayload, envVars.JWT_ACCESS_SECRET, "10m")
+
+        const resetUILink = `${envVars.FRONTEND_URL}/reset-password?id=${isUserExist._id}&token=${resetToken}`
+
+        
+
+    } catch (error: any) {
+        throw new Error(error)
+    }
 }
 
 export const AuthServices = {
@@ -107,5 +145,6 @@ export const AuthServices = {
     getNewAccessToken,
     changePassword,
     resetPassword,
-    setPassword
+    setPassword,
+    forgotPassword
 }

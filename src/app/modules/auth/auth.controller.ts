@@ -17,48 +17,31 @@ const credentialsLogin = catchAsync(async (req: Request, res: Response, next: Ne
     passport.authenticate("local", async (err: any, user: any, info: any) => {
 
         if (err) {
-            // return next(err)
-            return next(new AppError(httpStatus.UNAUTHORIZED, info.message))
-            // return new AppError(httpStatus.UNAUTHORIZED, err)
-            // throw new AppError(httpStatus.BAD_REQUEST,err)
+            return next(new AppError(httpStatus.UNAUTHORIZED, err))
         }
 
         if (!user) {
-            return next(new AppError(httpStatus.NOT_FOUND, info.message))
+            return next(new AppError(httpStatus.UNAUTHORIZED, info.message))
         }
 
-        const { accessToken, refreshToken } = createUserTokens(user)
+        const userTokens = createUserTokens(user)
 
-        setAuthCookie(res, { accessToken, refreshToken })
+        const { password: pass, ...rest } = user.toObject()
 
-        const { password, ...rest } = user.toObject()
-        // delete user.toObject().password
+        setAuthCookie(res, userTokens)
 
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.OK,
             message: "User Logged In Successfully",
             data: {
-                accessToken,
-                refreshToken,
+                accessToken: userTokens.accessToken,
+                refreshToken: userTokens.refreshToken,
                 user: rest
-            }
+
+            },
         })
     })(req, res, next)
-
-    // res.cookie("accessToken", loginInfo.accessToken, {
-    //     httpOnly: true,
-    //     secure: false,
-    // })
-
-
-
-    // res.cookie("refreshToken", loginInfo.refreshToken, {
-    //     httpOnly: true,
-    //     secure: false,
-    // })
-
-
 })
 
 const getNewAccessToken = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -149,6 +132,21 @@ const setPassword = catchAsync(async (req: Request, res: Response, next: NextFun
     })
 })
 
+const forgotPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+
+    const { email } = req.body;
+
+    await AuthServices.forgotPassword(email);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Email Sent Successfully",
+        data: null,
+    })
+})
+
 const googleCallbackControl = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
     let redirectTo = req.query.state ? req.query.state as string : ""
@@ -172,12 +170,13 @@ const googleCallbackControl = catchAsync(async (req: Request, res: Response, nex
     res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`)
 })
 
-export const AuthController = {
+export const AuthControllers = {
     credentialsLogin,
     getNewAccessToken,
     logout,
     changePassword,
     resetPassword,
     setPassword,
+    forgotPassword,
     googleCallbackControl
 }

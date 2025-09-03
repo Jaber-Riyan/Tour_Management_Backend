@@ -39,6 +39,14 @@ interface EnvConfig {
         CLOUDINARY_API_SECRET: string,
         CLOUDINARY_URL: string
     }
+
+    EMAIL_SENDER: {
+        SMTP_USER: string;
+        SMTP_PASSWORD: string;
+        SMTP_PORT: string;
+        SMTP_HOST: string;
+        SMTP_FROM: string;
+    };
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -58,8 +66,8 @@ const loadEnvVariables = (): EnvConfig => {
         "GOOGLE_CALLBACK_URL",
         "EXPRESS_SESSION_SECRET",
 
-        
-        "FRONTEND_URL", 
+
+        "FRONTEND_URL",
         "SSL_STORE_ID",
         "SSL_STORE_PASS",
         "SSL_PAYMENT_API",
@@ -75,7 +83,14 @@ const loadEnvVariables = (): EnvConfig => {
         "CLOUDINARY_CLOUD_NAME",
         "CLOUDINARY_API_KEY",
         "CLOUDINARY_API_SECRET",
-        "CLOUDINARY_URL"
+        "CLOUDINARY_URL",
+
+        
+        "SMTP_PASSWORD",
+        "SMTP_PORT",
+        "SMTP_HOST",
+        "SMTP_USER",
+        "SMTP_FROM",
     ];
 
     requiredEnvVariables.forEach(key => {
@@ -121,7 +136,17 @@ const loadEnvVariables = (): EnvConfig => {
             CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
             CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
             CLOUDINARY_URL: process.env.CLOUDINARY_URL as string
-        }
+        },
+
+        // EMAIL SENDER
+        EMAIL_SENDER: {
+            SMTP_USER: process.env.SMTP_USER as string,
+            SMTP_PASSWORD: process.env.SMTP_PASS as string,
+            SMTP_PORT: process.env.SMTP_PORT as string,
+            SMTP_HOST: process.env.SMTP_HOST as string,
+            SMTP_FROM: process.env.SMTP_FROM as string,
+        },
+
     }
 }
 

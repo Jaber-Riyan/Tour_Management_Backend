@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy, Profile as GoogleStrategyProfile, VerifyCallback } from "passport-google-oauth20";
 import { envVars } from "./env";
 import { User } from "../modules/user/user.model";
-import { Role } from "../modules/user/user.interface";
+import { IsActive, Role } from "../modules/user/user.interface";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcryptjs from "bcryptjs"
 
@@ -18,12 +18,20 @@ passport.use(
                 const isUserExist = await User.findOne({ email })
 
                 if (!isUserExist) {
-                    return done(null, false, { message: "User does not Exist" })
+                    return done("User does not Exist")
                 }
 
-                // if(!isUserExist){
-                //     return done("User does not Exist")
-                // }
+                if (!isUserExist.isVerified) {
+                    return done("User is not Verified!")
+                }
+
+                if (isUserExist.isActive === IsActive.BLOCKED || isUserExist.isActive === IsActive.INACTIVE) {
+                    return done(`User is ${isUserExist.isActive.toLowerCase()}`)
+                }
+
+                if (isUserExist.isDeleted) {
+                    return done("User is deleted")
+                }
 
                 const isGoogleAuthenticated = isUserExist.auths.some(providerObjects => providerObjects.provider == "google")
 
@@ -67,10 +75,22 @@ passport.use(
                     return done(null, false, { message: "No email Found" })
                 }
 
-                let user = await User.findOne({ email })
+                let isUserExist = await User.findOne({ email })
 
-                if (!user) {
-                    user = await User.create({
+                if (isUserExist && !isUserExist.isVerified) {
+                    return done(null, false, { message: "User is not verified" })
+                }
+
+                if (isUserExist && (isUserExist.isActive === IsActive.BLOCKED || isUserExist.isActive === IsActive.INACTIVE)) {
+                    done(`User is ${isUserExist.isActive}`)
+                }
+
+                if (isUserExist && isUserExist.isDeleted) {
+                    return done(null, false, { message: "User is deleted" })
+                }
+
+                if (!isUserExist) {
+                    isUserExist = await User.create({
                         email,
                         name: profile.displayName,
                         picture: profile.photos?.[0].value,
@@ -85,7 +105,7 @@ passport.use(
                     })
                 }
 
-                return done(null, user)
+                return done(null, isUserExist)
 
             } catch (error: any) {
                 console.log("Google Strategy Error", error);
