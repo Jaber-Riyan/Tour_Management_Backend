@@ -89,6 +89,20 @@ passport.use(
                     return done(null, false, { message: "User is deleted" })
                 }
 
+                if (isUserExist && isUserExist.auths.some(providerObj => providerObj.provider = "credentials")) {
+                    isUserExist.auths = [
+                        ...isUserExist.auths,
+                        {
+                            provider: "google",
+                            providerId: profile.id
+                        }
+                    ]
+
+                    isUserExist.picture = profile.photos?.[0].value
+
+                    await isUserExist.save()
+                }
+
                 if (!isUserExist) {
                     isUserExist = await User.create({
                         email,
