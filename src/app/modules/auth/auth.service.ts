@@ -8,6 +8,7 @@ import httpStatus from "http-status-codes"
 import { IAuthProvider, IsActive } from "../user/user.interface"
 import { generateJwtToken } from "../../utils/jwt"
 import { sendEmail } from "../../utils/sendEmail"
+import jwt from "jsonwebtoken"
 
 // const credentialsLogin = async (payload: Partial<IUser>) => {
 //     const { email, password: payloadPassword } = payload
@@ -138,7 +139,10 @@ const forgotPassword = async (email: string) => {
             role: isUserExist.role
         }
 
-        const resetToken = generateJwtToken(jwtPayload, envVars.JWT_ACCESS_SECRET, "10m")
+        const resetToken = jwt.sign(jwtPayload, envVars.JWT_ACCESS_SECRET, {
+            expiresIn: "10m",
+            algorithm: "HS512"
+        })
 
         const passwordRestLink = `${envVars.FRONTEND_URL}/reset-password?id=${isUserExist._id}&token=${resetToken}`
 
