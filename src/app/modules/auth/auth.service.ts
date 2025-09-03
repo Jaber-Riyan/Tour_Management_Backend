@@ -7,6 +7,7 @@ import bcryptjs from "bcryptjs"
 import httpStatus from "http-status-codes"
 import { IAuthProvider, IsActive } from "../user/user.interface"
 import { generateJwtToken } from "../../utils/jwt"
+import { sendEmail } from "../../utils/sendEmail"
 
 // const credentialsLogin = async (payload: Partial<IUser>) => {
 //     const { email, password: payloadPassword } = payload
@@ -57,18 +58,26 @@ const changePassword = async (oldPassword: string, newPassword: string, decodedT
     user?.save()
 }
 
-const resetPassword = async (oldPassword: string, newPassword: string, decodedToken: JwtPayload) => {
-    const user = await User.findById(decodedToken.userId)
-
-    const isPasswordMatched = await bcryptjs.compare(oldPassword, user?.password as string)
-
-    if (!isPasswordMatched) {
-        throw new AppError(httpStatus.UNAUTHORIZED, "Old Password Does't Match")
+const resetPassword = async (payload: Record<string, any>, decodedToken: JwtPayload) => {
+    if (payload.id !== decodedToken.userId) {
+        throw new AppError(401, "You can not reset your password")
     }
 
-    user!.password = await bcryptjs.hash(newPassword, Number(envVars.BCRYPT_SALT_ROUND))
+    const isUserExist = await User.findById(decodedToken.userId)
 
-    user?.save()
+    if (!isUserExist) {
+        throw new AppError(401, "User does not exist")
+    }
+
+    const hashedPassword = await bcryptjs.hash(
+        payload.newPassword,
+        Number(envVars.BCRYPT_SALT_ROUND)
+    )
+
+    isUserExist.password = hashedPassword
+
+    await isUserExist.save()
+
 }
 
 const setPassword = async (decodedToken: JwtPayload, plainPassword: string) => {
@@ -131,9 +140,17 @@ const forgotPassword = async (email: string) => {
 
         const resetToken = generateJwtToken(jwtPayload, envVars.JWT_ACCESS_SECRET, "10m")
 
-        const resetUILink = `${envVars.FRONTEND_URL}/reset-password?id=${isUserExist._id}&token=${resetToken}`
+        const passwordRestLink = `${envVars.FRONTEND_URL}/reset-password?id=${isUserExist._id}&token=${resetToken}`
 
-        
+        sendEmail({
+            to: isUserExist.email,
+            subject: "Password Reset",
+            templateName: "forgetPassword",
+            templateData: {
+                name: isUserExist.name,
+                passwordRestLink
+            }
+        })
 
     } catch (error: any) {
         throw new Error(error)

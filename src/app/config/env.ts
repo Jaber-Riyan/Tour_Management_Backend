@@ -42,7 +42,7 @@ interface EnvConfig {
 
     EMAIL_SENDER: {
         SMTP_USER: string;
-        SMTP_PASSWORD: string;
+        SMTP_PASS: string;
         SMTP_PORT: string;
         SMTP_HOST: string;
         SMTP_FROM: string;
@@ -86,7 +86,7 @@ const loadEnvVariables = (): EnvConfig => {
         "CLOUDINARY_URL",
 
         
-        "SMTP_PASSWORD",
+        "SMTP_PASS",
         "SMTP_PORT",
         "SMTP_HOST",
         "SMTP_USER",
@@ -141,7 +141,7 @@ const loadEnvVariables = (): EnvConfig => {
         // EMAIL SENDER
         EMAIL_SENDER: {
             SMTP_USER: process.env.SMTP_USER as string,
-            SMTP_PASSWORD: process.env.SMTP_PASS as string,
+            SMTP_PASS: process.env.SMTP_PASS as string,
             SMTP_PORT: process.env.SMTP_PORT as string,
             SMTP_HOST: process.env.SMTP_HOST as string,
             SMTP_FROM: process.env.SMTP_FROM as string,

@@ -1,17 +1,18 @@
-import nodemailer from "nodemailer"
-import { envVars } from "../config/env"
+import ejs from "ejs";
+import nodemailer from "nodemailer";
+import path from "path";
+import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
-import path from "path"
-import ejs from "ejs"
 
 const transporter = nodemailer.createTransport({
-    host: envVars.EMAIL_SENDER.SMTP_HOST,
-    port: Number(envVars.EMAIL_SENDER.SMTP_PORT),
+    // port: envVars.EMAIL_SENDER.SMTP_PORT,
     secure: true,
     auth: {
         user: envVars.EMAIL_SENDER.SMTP_USER,
-        pass: envVars.EMAIL_SENDER.SMTP_PASSWORD
+        pass: envVars.EMAIL_SENDER.SMTP_PASS
     },
+    port: Number(envVars.EMAIL_SENDER.SMTP_PORT),
+    host: envVars.EMAIL_SENDER.SMTP_HOST
 })
 
 interface SendEmailOptions {
@@ -26,7 +27,7 @@ interface SendEmailOptions {
     }[]
 }
 
-export const sendMail = async ({
+export const sendEmail = async ({
     to,
     subject,
     templateName,
@@ -34,7 +35,7 @@ export const sendMail = async ({
     attachments
 }: SendEmailOptions) => {
     try {
-        const templatePath = path.join(__dirname, `templates/${templateName}`)
+        const templatePath = path.join(__dirname, `templates/${templateName}.ejs`)
 
         const html = await ejs.renderFile(templatePath, templateData)
 
@@ -51,10 +52,10 @@ export const sendMail = async ({
         })
 
         console.log(`\u2709\uFE0F Email sent to ${to}: ${info.messageId}`);
-    }
-    catch (error: any) {
+    
+    } catch (error: any) {
         console.log("email sending error", error.message);
-        throw new AppError(401, "Email Sending Error")
+        throw new AppError(401, "Email error")
     }
-}
 
+}
