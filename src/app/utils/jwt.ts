@@ -18,10 +18,10 @@ export const verifyToken = (token: string, secret: string): JwtPayload => {
         console.log("JWT ERROR:", error.name, error.message);
 
         if (error.name === "TokenExpiredError") {
-            throw new AppError(401, "Token expired. Please login again.");
+            throw new AppError(401, "Token expired. Please get new one");
         }
         if (error.name === "JsonWebTokenError") {
-            throw new AppError(401, "Invalid token. Please login again.");
+            throw new AppError(401, "Invalid token. Please get new one");
         }
         throw new AppError(401, "Unauthorized access");
     }
