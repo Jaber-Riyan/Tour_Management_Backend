@@ -9,11 +9,7 @@ import { PAYMENT_STATUS } from "../payment/payment.interface";
 import { v4 as uuidv4 } from "uuid"
 import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
 import { SSLService } from "../sslCommerz/sslCommerz.service";
-
-const getTransactionId = () => {
-    // return `tran_${Date.now()}_${uuidv4()}`
-    return `tran_${Date.now()}`
-}
+import { getTransactionId } from "../../utils/getTransactionId";
 
 const createBooking = async (payload: Partial<IBooking>, userId: string) => {
     const transactionId = getTransactionId()

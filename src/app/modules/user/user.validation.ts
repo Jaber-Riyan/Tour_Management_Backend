@@ -32,16 +32,17 @@ export const createUserZodSchema = z.object({
     password: z
         .string()
         .refine(val => typeof val === "string", { message: "Name must be a string value" })
-    // .min(8, { message: "Password must be at least 8 characters long." })
-    // .regex(/^(?=.*[A-Z])/, {
-    //     message: "Password must contain at least 1 uppercase letter.",
-    // })
-    // .regex(/^(?=.*[!@#$%^&*])/, {
-    //     message: "Password must contain at least 1 special character.",
-    // })
-    // .regex(/^(?=.*\d)/, {
-    //     message: "Password must contain at least 1 number.",
-    // })
+        .trim()
+        // .min(8, { message: "Password must be at least 8 characters long." })
+        // .regex(/^(?=.*[A-Z])/, {
+        //     message: "Password must contain at least 1 uppercase letter.",
+        // })
+        // .regex(/^(?=.*[!@#$%^&*])/, {
+        //     message: "Password must contain at least 1 special character.",
+        // })
+        // .regex(/^(?=.*\d)/, {
+        //     message: "Password must contain at least 1 number.",
+        // })
     ,
     phone: z
         .string()

@@ -99,7 +99,7 @@ const logout = catchAsync(async (req: Request, res: Response, next: NextFunction
     })
 })
 
-const resetPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+const changePassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
     const decodedToken = req.user
 
@@ -116,6 +116,39 @@ const resetPassword = catchAsync(async (req: Request, res: Response, next: NextF
     })
 })
 
+const resetPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+    const decodedToken = req.user
+
+    const newPasswordFromBody = req.body.newPassword
+    const oldPasswordFromBody = req.body.oldPassword
+
+    await AuthServices.changePassword(oldPasswordFromBody, newPasswordFromBody, decodedToken as JwtPayload)
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Password Updated Successfully",
+        data: null
+    })
+})
+
+const setPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+    const decodedToken = req.user as JwtPayload
+
+    const plainPassword = req.body.plainPassword
+
+    const result = await AuthServices.setPassword(decodedToken, plainPassword)
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Password Set Successfully",
+        data: null
+    })
+})
+
 const googleCallbackControl = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
     let redirectTo = req.query.state ? req.query.state as string : ""
@@ -126,7 +159,7 @@ const googleCallbackControl = catchAsync(async (req: Request, res: Response, nex
 
     const user = req.user
 
-    console.log("User From OAuth", user)
+    // console.log("User From OAuth", user)
 
     if (!user) {
         throw new AppError(httpStatus.NOT_FOUND, "User Not Found!")
@@ -143,6 +176,8 @@ export const AuthController = {
     credentialsLogin,
     getNewAccessToken,
     logout,
+    changePassword,
     resetPassword,
+    setPassword,
     googleCallbackControl
 }
