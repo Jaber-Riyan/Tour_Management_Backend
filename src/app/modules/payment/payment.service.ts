@@ -1,8 +1,9 @@
+import { JwtPayload } from "jsonwebtoken";
 import { uploadBufferToCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
 import { generatePdf, IInvoiceData } from "../../utils/invoice";
 import { sendEmail } from "../../utils/sendEmail";
-import { BOOKING_STATUS } from "../booking/booking.interface"
+import { BOOKING_STATUS, IBooking } from "../booking/booking.interface"
 import { Booking } from "../booking/booking.model"
 import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
 import { SSLService } from "../sslCommerz/sslCommerz.service";
@@ -10,7 +11,8 @@ import { ITour } from "../tour/tour.interface";
 import { IUser } from "../user/user.interface";
 import { PAYMENT_STATUS } from "./payment.interface"
 import { Payment } from "./payment.model"
-import httpStatus from "http-status-codes"
+import httpStatus, { StatusCodes } from "http-status-codes"
+import { User } from "../user/user.model";
 
 const initPayment = async (bookingId: string) => {
 
@@ -267,9 +269,31 @@ const cancelPayment = async (query: Record<string, string>) => {
     }
 }
 
+const getInvoiceDownloadUrl = async (paymentId: string, decodedToken: JwtPayload) => {
+    const payment = await Payment.findById(paymentId)
+        .populate("booking")
+
+    const user = await User.findById((payment?.booking as unknown as IBooking).user)
+
+    if (decodedToken.userId !== user?.id) {
+        throw new AppError(StatusCodes.UNAUTHORIZED, "You Are Not Valid User Of This Invoice")
+    }
+
+    if (!payment) {
+        throw new AppError(StatusCodes.NOT_FOUND, "Payment Not Found")
+    }
+
+    if (!payment.invoiceUrl) {
+        throw new AppError(StatusCodes.NOT_FOUND, "No Invoice Found")
+    }
+
+    return payment.invoiceUrl
+};
+
 export const PaymentService = {
     initPayment,
     successPayment,
     failPayment,
-    cancelPayment
+    cancelPayment,
+    getInvoiceDownloadUrl
 }
