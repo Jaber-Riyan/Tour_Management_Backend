@@ -1,8 +1,13 @@
+import { uploadBufferToCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
+import { generatePdf, IInvoiceData } from "../../utils/invoice";
+import { sendEmail } from "../../utils/sendEmail";
 import { BOOKING_STATUS } from "../booking/booking.interface"
 import { Booking } from "../booking/booking.model"
 import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
 import { SSLService } from "../sslCommerz/sslCommerz.service";
+import { ITour } from "../tour/tour.interface";
+import { IUser } from "../user/user.interface";
 import { PAYMENT_STATUS } from "./payment.interface"
 import { Payment } from "./payment.model"
 import httpStatus from "http-status-codes"
@@ -55,7 +60,7 @@ const successPayment = async (query: Record<string, string>) => {
 
     try {
         // Update Payment Status 
-        const updatePayment = await Payment.findOneAndUpdate(
+        let updatedPayment = await Payment.findOneAndUpdate(
             {
                 transactionId: query.transactionId
             },
@@ -69,9 +74,13 @@ const successPayment = async (query: Record<string, string>) => {
             }
         )
 
+        if (!updatedPayment) {
+            throw new AppError(401, "Payment Not Found")
+        }
+
         // Update Booking Status 
-        await Booking.findByIdAndUpdate(
-            updatePayment?.booking,
+        const updatedBooking = await Booking.findByIdAndUpdate(
+            updatedPayment?.booking,
             {
                 status: BOOKING_STATUS.COMPLETE
             },
@@ -81,6 +90,63 @@ const successPayment = async (query: Record<string, string>) => {
                 session
             }
         )
+            .populate("tour", "title location description startDate endDate")
+            .populate("user", "name email address phone ")
+
+        if (!updatedBooking) {
+            throw new AppError(401, "Booking Not Found")
+        }
+
+        // Invoice PDF Payload
+        const invoiceData: IInvoiceData = {
+            bookingDate: (updatedBooking.createdAt as unknown as Date),
+            guestCount: updatedBooking?.guestCount,
+            totalAmount: updatedPayment?.amount,
+            transactionId: updatedPayment?.transactionId,
+            tourTitle: (updatedBooking?.tour as unknown as ITour).title,
+            userName: (updatedBooking?.user as unknown as IUser).name
+        }
+
+        // Send Mail With Invoice Payment 
+        const pdfBuffer = await generatePdf(invoiceData)
+
+        const cloudinaryResult = await uploadBufferToCloudinary(pdfBuffer, "invoice")
+
+        if (!cloudinaryResult) {
+            throw new AppError(401, "Error uploading pdf")
+        }
+
+        updatedPayment = await Payment.findByIdAndUpdate(updatedPayment._id, { invoiceUrl: cloudinaryResult.secure_url }, { new: true, runValidators: true, session })
+
+        if (!updatedPayment) {
+            throw new AppError(401, "Payment Not Found")
+        }
+
+        const invoiceEmailData = {
+            name: (updatedBooking?.user as unknown as IUser).name,
+            email: (updatedBooking?.user as unknown as IUser).email,
+            phone: (updatedBooking?.user as unknown as IUser).phone,
+            address: (updatedBooking?.user as unknown as IUser).address,
+            paymentId: updatedPayment._id,
+            transactionId: updatedPayment.transactionId,
+            amount: updatedPayment.amount,
+            bookingDate: new Date(updatedBooking.createdAt).toLocaleString(),
+            invoiceLink: updatedPayment?.invoiceUrl
+        }
+
+        await sendEmail({
+            to: (updatedBooking.user as unknown as IUser).email,
+            subject: "Your Booking Invoice",
+            templateName: "invoice",
+            templateData: invoiceEmailData,
+            attachments: [
+                {
+                    filename: "invoice.pdf",
+                    content: pdfBuffer,
+                    contentType: "application/pdf"
+                }
+            ]
+        })
 
         // Transaction Commit and End the Session
         await session.commitTransaction() // Transaction
