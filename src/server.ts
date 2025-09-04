@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 import { app } from './app'
 import { envVars } from './app/config/env'
 import { seedSuperAdmin } from './app/utils/seedSuperAdmin'
+import { connectRedis } from './app/config/redis.config'
 
 
 let server: Server
@@ -24,6 +25,7 @@ const startSever = async () => {
 }
 
 (async () => {
+    connectRedis()
     startSever()
     seedSuperAdmin()
 })()
