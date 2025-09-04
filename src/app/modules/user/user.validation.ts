@@ -33,16 +33,16 @@ export const createUserZodSchema = z.object({
         .string()
         .refine(val => typeof val === "string", { message: "Name must be a string value" })
         .trim()
-        // .min(8, { message: "Password must be at least 8 characters long." })
-        // .regex(/^(?=.*[A-Z])/, {
-        //     message: "Password must contain at least 1 uppercase letter.",
-        // })
-        // .regex(/^(?=.*[!@#$%^&*])/, {
-        //     message: "Password must contain at least 1 special character.",
-        // })
-        // .regex(/^(?=.*\d)/, {
-        //     message: "Password must contain at least 1 number.",
-        // })
+    // .min(8, { message: "Password must be at least 8 characters long." })
+    // .regex(/^(?=.*[A-Z])/, {
+    //     message: "Password must contain at least 1 uppercase letter.",
+    // })
+    // .regex(/^(?=.*[!@#$%^&*])/, {
+    //     message: "Password must contain at least 1 special character.",
+    // })
+    // .regex(/^(?=.*\d)/, {
+    //     message: "Password must contain at least 1 number.",
+    // })
     ,
     phone: z
         .string()
@@ -64,20 +64,6 @@ export const updateUserZodSchema = z.object({
         .refine(val => typeof val === "string", { message: "Name must be string" })
         .min(2, { message: "Name must be at least 2 characters long." })
         .max(50, { message: "Name cannot exceed 50 characters." })
-        .optional(),
-    password: z
-        .string()
-        .refine(val => typeof val === "string", { message: "Password must be string" })
-        // .min(8, { message: "Password must be at least 8 characters long." })
-        // .regex(/^(?=.*[A-Z])/, {
-        //     message: "Password must contain at least 1 uppercase letter.",
-        // })
-        // .regex(/^(?=.*[!@#$%^&*])/, {
-        //     message: "Password must contain at least 1 special character.",
-        // })
-        // .regex(/^(?=.*\d)/, {
-        //     message: "Password must contain at least 1 number.",
-        // })
         .optional(),
     phone: z
         .string()

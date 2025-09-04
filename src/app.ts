@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser'
 import passport from 'passport'
 import expressSession from "express-session"
 import "./app/config/passport"
+import { envVars } from './app/config/env'
 
 export const app: Application = express()
 
@@ -26,9 +27,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(morgan("dev"))
 app.use(cors({
-    origin: [
-
-    ],
+    origin: envVars.FRONTEND_URL,
     credentials: true
 }))
 
