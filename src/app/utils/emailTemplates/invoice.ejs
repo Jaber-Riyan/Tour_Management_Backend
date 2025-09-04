@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Forgot Password</title>
+    <title>Booking Invoice</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       /* Reset */
@@ -14,14 +14,14 @@
 
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #00b09b, #96c93d);
+        background: linear-gradient(135deg, #667eea, #764ba2);
         color: #333;
         padding: 20px;
       }
 
-      /* Container Card */
+      /* Container */
       .container {
-        max-width: 600px;
+        max-width: 650px;
         margin: 40px auto;
         background: #ffffff;
         border-radius: 14px;
@@ -32,7 +32,7 @@
 
       /* Header */
       .header {
-        background: linear-gradient(135deg, #00b09b, #96c93d);
+        background: linear-gradient(135deg, #667eea, #764ba2);
         color: #fff;
         padding: 35px 20px;
         text-align: center;
@@ -52,7 +52,7 @@
       .content h2 {
         font-size: 22px;
         margin-bottom: 20px;
-        color: #00b09b;
+        color: #667eea;
         animation: fadeIn 1s ease 0.3s;
       }
       .content p {
@@ -63,25 +63,43 @@
         animation: fadeIn 1s ease 0.6s;
       }
 
+      /* Invoice Details Box */
+      .invoice-box {
+        background: #f9f9ff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: left;
+        animation: fadeIn 1s ease 0.8s;
+      }
+      .invoice-box p {
+        margin: 8px 0;
+        font-size: 15px;
+      }
+      .invoice-box strong {
+        color: #333;
+      }
+
       /* Button */
       .btn {
         display: inline-block;
         margin: 30px 0;
         padding: 14px 32px;
-        background: linear-gradient(135deg, #00b09b, #96c93d);
+        background: linear-gradient(135deg, #667eea, #764ba2);
         color: #fff !important;
         text-decoration: none;
         border-radius: 50px;
         font-size: 16px;
         font-weight: 600;
         letter-spacing: 0.5px;
-        box-shadow: 0 6px 15px rgba(0, 176, 155, 0.4);
+        box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         animation: pulse 1.5s infinite;
       }
       .btn:hover {
         transform: scale(1.05);
-        box-shadow: 0 8px 18px rgba(0, 176, 155, 0.55);
+        box-shadow: 0 8px 18px rgba(102, 126, 234, 0.55);
       }
 
       /* Footer */
@@ -154,24 +172,26 @@
     <div class="container">
       <!-- Header -->
       <div class="header">
-        <h1>🔒 PH Tour Management</h1>
+        <h1>📄 Booking Invoice</h1>
       </div>
 
       <!-- Content -->
       <div class="content">
-        <h2>Password Reset Request</h2>
-        <p>Hello <%= name %>,</p>
+        <h2>Thank you for your booking, <%= name %>!</h2>
         <p>
-          We received a request to reset your password. Please click the button
-          below to securely create a new password.
+          We have successfully received your payment. Below are your booking
+          details:
         </p>
-        <a class="btn" href="<%= passwordRestLink %>">Reset My Password</a>
-        <p>
-          ⚠️ If you did not request this OTP, please ignore this email or
-          contact support immediately.
-          <br />
-          The reset link will expire in <strong>10 minutes</strong>.
-        </p>
+
+        <!-- Invoice Box -->
+        <div class="invoice-box">
+          <p><strong>Payment ID:</strong> <%= paymentId %></p>
+          <p><strong>Amount Paid:</strong> <%= amount %></p>
+          <p><strong>Booking Date:</strong> <%= bookingDate %></p>
+        </div>
+
+        <!-- Download Button -->
+        <a class="btn" href="<%= invoiceLink %>">Download Invoice PDF</a>
       </div>
 
       <!-- Footer -->
