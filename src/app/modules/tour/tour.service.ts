@@ -124,6 +124,17 @@ const getAllTours = async (query: Record<string, string>) => {
     }
 };
 
+const getSingleTour = async (slug: string) => {
+    const tour = await Tour.findOne({ slug })
+
+    if (!tour) {
+        throw new Error("Tour not found.");
+    }
+
+    return {
+        data: tour,
+    }
+};
 
 const updateTour = async (id: string, payload: Partial<ITour>) => {
 
@@ -174,9 +185,11 @@ const createTourType = async (payload: ITourType) => {
 
     return await TourType.create({ name: payload.name });
 };
+
 const getAllTourTypes = async () => {
     return await TourType.find();
 };
+
 const updateTourType = async (id: string, payload: ITourType) => {
     const existingTourType = await TourType.findById(id);
     if (!existingTourType) {
@@ -186,6 +199,7 @@ const updateTourType = async (id: string, payload: ITourType) => {
     const updatedTourType = await TourType.findByIdAndUpdate(id, payload, { new: true });
     return updatedTourType;
 };
+
 const deleteTourType = async (id: string) => {
     const existingTourType = await TourType.findById(id);
     if (!existingTourType) {
@@ -202,6 +216,7 @@ export const TourService = {
     updateTourType,
     getAllTourTypes,
     getAllTours,
+    getSingleTour,
     updateTour,
     deleteTour,
 };

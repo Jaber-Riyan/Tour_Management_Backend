@@ -89,7 +89,7 @@ passport.use(
                     return done(null, false, { message: "User is deleted" })
                 }
 
-                if (isUserExist && isUserExist.auths.some(providerObj => providerObj.provider = "credentials")) {
+                if (isUserExist && isUserExist.auths.some(providerObj => providerObj.provider = "credentials") && !isUserExist.auths.some(providerObj => providerObj.provider = "google")) {
                     isUserExist.auths = [
                         ...isUserExist.auths,
                         {
