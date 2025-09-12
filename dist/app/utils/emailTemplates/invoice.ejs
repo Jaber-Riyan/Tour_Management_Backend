@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Booking Invoice</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #00b09b, #96c93d);
+        color: #333;
+        padding: 20px;
+        margin: 0;
+      }
+
+      .container {
+        max-width: 650px;
+        margin: 40px auto;
+        background: #ffffff;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        animation: fadeInUp 0.8s ease;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #00b09b, #96c93d);
+        color: #fff;
+        padding: 35px 20px;
+        text-align: center;
+        animation: slideDown 1s ease;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 26px;
+        letter-spacing: 1px;
+      }
+
+      .content {
+        padding: 35px 25px;
+        text-align: center;
+      }
+      .content h2 {
+        font-size: 22px;
+        margin-bottom: 20px;
+        color: #00b09b;
+      }
+      .content p {
+        line-height: 1.6;
+        margin: 12px 0;
+        font-size: 15px;
+        color: #444;
+      }
+
+      .section-title {
+        font-size: 18px;
+        color: #333;
+        margin: 25px 0 15px;
+        text-align: left;
+        border-left: 4px solid #667eea;
+        padding-left: 10px;
+      }
+
+      .box {
+        background: #f9f9ff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: left;
+      }
+      .box p {
+        margin: 8px 0;
+        font-size: 15px;
+      }
+      .box strong {
+        color: #333;
+      }
+
+      .btn {
+        display: inline-block;
+        margin: 30px 0;
+        padding: 14px 32px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff !important;
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 18px rgba(102, 126, 234, 0.55);
+      }
+
+      .footer {
+        background: #f7f7f7;
+        text-align: center;
+        padding: 18px;
+        font-size: 12px;
+        color: #666;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .header h1 {
+          font-size: 22px;
+        }
+        .content h2 {
+          font-size: 18px;
+        }
+        .btn {
+          width: 100%;
+          text-align: center;
+          padding: 14px 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>📄 Booking Invoice</h1>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <h2>Thank you for your booking, <%= name %>!</h2>
+        <p>We have successfully received your payment. Below are your details:</p>
+
+        <!-- User Info -->
+        <h3 class="section-title">👤 Customer Information</h3>
+        <div class="box">
+          <p><strong>Name:</strong> <%= name %></p>
+          <p><strong>Email:</strong> <%= email %></p>
+          <p><strong>Phone:</strong> <%= phone %></p>
+          <p><strong>Address:</strong> <%= address %></p>
+        </div>
+
+        <!-- Payment Info -->
+        <h3 class="section-title">💳 Payment Details</h3>
+        <div class="box">
+          <p><strong>Payment ID:</strong> <%= paymentId %></p>
+          <p><strong>Transaction ID:</strong> <%= transactionId %></p>
+          <p><strong>Amount Paid:</strong> <%= amount %></p>
+          <p><strong>Booking Date:</strong> <%= bookingDate %></p>
+        </div>
+
+        <!-- Download Button -->
+        <a class="btn" href="<%= invoiceLink %>">⬇️ Download Invoice PDF</a>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        &copy; <%= new Date().getFullYear() %> PH Tour Management. All rights reserved.
+      </div>
+    </div>
+  </body>
+</html>

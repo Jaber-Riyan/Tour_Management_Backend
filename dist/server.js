@@ -14,22 +14,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const app_1 = require("./app");
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
+const env_1 = require("./app/config/env");
+const seedSuperAdmin_1 = require("./app/utils/seedSuperAdmin");
+const redis_config_1 = require("./app/config/redis.config");
 let server;
 const startSever = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield mongoose_1.default.connect(`${process.env.DB_URL}`);
+        // await mongoose.connect(`${envVars.DB_URL}`)
+        yield mongoose_1.default.connect(env_1.envVars.DB_URL);
         console.log("Server Working Finely 🎉");
-        server = app_1.app.listen(process.env.PORT, () => {
-            console.log(`Server is listening to port ${process.env.PORT}`);
+        server = app_1.app.listen(env_1.envVars.PORT, () => {
+            console.log(`Server is listening to port ${env_1.envVars.PORT}`);
         });
     }
     catch (error) {
         console.log(error);
     }
 });
-startSever();
+(() => __awaiter(void 0, void 0, void 0, function* () {
+    (0, redis_config_1.connectRedis)();
+    startSever();
+    (0, seedSuperAdmin_1.seedSuperAdmin)();
+}))();
 process.on("SIGTERM", () => {
     console.log("Signal Termination received....Server shutting down");
     if (server) {
