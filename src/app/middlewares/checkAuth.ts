@@ -9,7 +9,8 @@ import { IsActive } from "../modules/user/user.interface"
 
 export const checkAuth = (...authRoles: string[]) => async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const accessToken = req.headers.authorization
+        // console.log(req.cookies)
+        const accessToken = req.headers.authorization || req.cookies.accessToken
 
         if (!accessToken) {
             throw new AppError(httpStatus.NOT_FOUND, "Access Token Not Received Yet!")
@@ -17,7 +18,11 @@ export const checkAuth = (...authRoles: string[]) => async (req: Request, res: R
 
         const verifiedToken = verifyToken(accessToken as string, envVars.JWT_ACCESS_SECRET) as JwtPayload
 
+        // console.log(verifiedToken)
+
         const isUserExist = await User.findOne({ email: verifiedToken.email })
+
+        // console.log(isUserExist)
 
         if (!isUserExist) {
             throw new AppError(httpStatus.BAD_REQUEST, "User does not Exist")

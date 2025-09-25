@@ -111,6 +111,8 @@ const getSingleUser = async (id: string) => {
 const getMe = async (userId: string) => {
     let isUserExist = await User.findById(userId)
 
+    // console.log(isUserExist)
+
     if (!isUserExist) {
         throw new AppError(httpStatus.BAD_REQUEST, "User Not Found!")
     }

@@ -4,6 +4,7 @@ import AppError from "../../errorHelpers/AppError"
 import { StatusCodes } from "http-status-codes"
 import { redisClient } from "../../config/redis.config"
 import { sendEmail } from "../../utils/sendEmail"
+
 const OTP_EXPIRATION = 2 * 60
 
 const generateOtp = (length = 6) => {
@@ -15,7 +16,7 @@ const generateOtp = (length = 6) => {
     return otp
 }
 
-const sendOTP = async (email: string, name: string) => {
+const sendOTP = async (email: string) => {
     const user = await User.findOne({ email })
 
     if (!user) {
@@ -42,7 +43,7 @@ const sendOTP = async (email: string, name: string) => {
         subject: "Your OTP Code",
         templateName: "otp",
         templateData: {
-            name,
+            name: user.name,
             otp
         }
     })

@@ -8,7 +8,6 @@ import { connectRedis } from './app/config/redis.config'
 
 let server: Server
 
-
 const startSever = async () => {
     try {
         // await mongoose.connect(`${envVars.DB_URL}`)
