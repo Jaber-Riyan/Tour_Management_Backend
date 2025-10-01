@@ -176,7 +176,6 @@ const deleteTour = async (id: string) => {
 /*------------------------------------------TOUR TYPES APIS SERVICES--------------------------------------*/
 
 const createTourType = async (payload: ITourType) => {
-    console.log("Payload", payload);
     const existingTourType = await TourType.findOne({ name: payload.name });
 
     if (existingTourType) {
